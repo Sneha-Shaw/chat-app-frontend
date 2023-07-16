@@ -110,7 +110,6 @@ const ChatWindow = () => {
   useEffect(() => {
     const chatWindow = document.querySelector(".chat-window");
     if (chatWindow) {
-      console.log(chatWindow.scrollHeight);
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
   }, [messages]);

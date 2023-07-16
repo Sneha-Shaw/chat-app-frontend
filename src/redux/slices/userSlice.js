@@ -18,7 +18,6 @@ export const login = createAsyncThunk(
     `${nameSpace}/login`,
     async (data, { rejectWithValue }) => {
         try {
-            console.log(data);
             const res = await axios.post(`${API}/api/users/login`, data);
             if (res.data.success) {
                 localStorage.setItem("userInfo", JSON.stringify(res.data.data));
@@ -80,7 +79,6 @@ export const searchUsers = createAsyncThunk(
     `${nameSpace}/searchUsers`,
     async (data, { rejectWithValue }) => {
         try {
-            console.log(data);  
             const body = {
                 name: data
             }

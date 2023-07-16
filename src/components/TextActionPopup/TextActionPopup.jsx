@@ -12,7 +12,6 @@ const TextActionPopup = ({
   const handleClickOutside = () => {
     setShowPopup(false);
   };
-  console.log(message);
 
   useEffect(() => {
     document.addEventListener("click", handleClickOutside);

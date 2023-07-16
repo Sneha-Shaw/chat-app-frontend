@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const API = process.env.REACT_APP_API_HOST;
 
-const client = new W3CWebSocket(`${API}`);
+// const client = new WebSocket('ws://localhost:5000');
+const client = new WebSocket('wss://chat-socket-backend.cyclic.app');
+
 
 const SocketConnection = (userInfo) => {
 
