@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const client = new W3CWebSocket('ws://localhost:5000');
+const API = process.env.REACT_APP_API_HOST;
+
+const client = new W3CWebSocket(`${API}`);
 
 const SocketConnection = (userInfo) => {
 
@@ -9,6 +11,8 @@ const SocketConnection = (userInfo) => {
     const [userId, setUserId] = useState('')
 
     useEffect(() => {
+
+        // connect to websocket from every page
         client.onopen = () => {
             console.log('WebSocket Client Connected');
             setConnected(true)
@@ -19,7 +23,7 @@ const SocketConnection = (userInfo) => {
             if (dataFromServer.type === "userId") {
                 setUserId(dataFromServer.userId)
             }
-           
+
         }
 
     });
