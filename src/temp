@@ -1,0 +1,110 @@
+
+import React, { useState, useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid'
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+const client = new W3CWebSocket('ws://localhost:5000');
+
+function App() {
+
+  const [users, setUsers] = useState([])
+  const [userActivity, setUserActivity] = useState([])
+  const [name, setName] = useState('')
+  const [message, setMessage] = useState('')
+  const [chat, setChat] = useState([])
+
+  useEffect(() => {
+    client.onopen = () => {
+      console.log('WebSocket Client Connected');
+    };
+    client.onmessage = (message) => {
+      const dataFromServer = JSON.parse(message.data);
+      if (dataFromServer.type === "message") {
+        setChat([...chat, dataFromServer])
+      } else if (dataFromServer.type === "user") {
+        setUsers([...users, dataFromServer.users])
+        setUserActivity(dataFromServer.userActivity)
+      }
+    };
+  });
+
+  const sendMessage = (e) => {
+    e.preventDefault()
+    const messageObject = {
+      type: "message",
+      id: uuidv4(),
+      message,
+    }
+    client.send(JSON.stringify(messageObject))
+    setMessage('')
+  }
+
+  const sendUser = (e) => {
+    e.preventDefault()
+    const userObject = {
+      type: "user",
+      id: uuidv4(),
+      name,
+    }
+    client.send(JSON.stringify(userObject))
+    setName('')
+  }
+  console.log("users:", users);
+  return (
+    <div className="App">
+      <h1>Chat App</h1>
+      <div className="chat">
+        <div className="users">
+          <h2>Users</h2>
+          <ul>
+            {users.map((user) => (
+              <li key={user.id}>{user.name}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="chat-box">
+          <h2>Chat Box</h2>
+          <ul>
+            {chat.map((message) => (
+              <li key={message.id}>{message.message}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="user-activity">
+          <h2>User Activity</h2>
+          <ul>
+            {userActivity.map((activity) => (
+              <li key={uuidv4()}>{activity}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="form">
+        <form onSubmit={sendUser}>
+          <label htmlFor="name">Name: </label>
+          <input type
+            ="text"
+            name="name"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button type="submit">Send</button>
+        </form>
+        <form onSubmit={sendMessage}>
+          <label htmlFor="message">Message: </label>
+          <input
+            type="text"
+            name="message"
+            id="message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default App;
