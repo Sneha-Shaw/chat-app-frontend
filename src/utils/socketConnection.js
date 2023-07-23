@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 
 
 // const client = new WebSocket('ws://localhost:5000');
-const client = new WebSocket('wss://chat-socket-backend.cyclic.app');
+// connect to websocket from every page (production)
+// const client = new WebSocket('wss://chat-app-socket-server.herokuapp.com/');
+
+const client = new WebSocket('wss://chat-socket-backend.cyclic.app/');
 
 
 const SocketConnection = (userInfo) => {

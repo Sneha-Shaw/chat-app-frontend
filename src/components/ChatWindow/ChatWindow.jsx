@@ -13,11 +13,15 @@ import TagFacesIcon from "@mui/icons-material/TagFaces";
 import EmojiPicker from "emoji-picker-react";
 import TextActionPopup from "../TextActionPopup/TextActionPopup";
 import { deleteMessage } from "../../redux/slices/messageSlice";
+import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from "@mui/material/Skeleton";
 
 const ChatWindow = () => {
-  const { data: conversation, error } = useSelector(
-    (state) => state.conversation
-  );
+  const {
+    data: conversation,
+    loading,
+    error,
+  } = useSelector((state) => state.conversation);
 
   const { data: deleted } = useSelector((state) => state.message);
 
@@ -80,7 +84,9 @@ const ChatWindow = () => {
     if (conversation) {
       setMessages(conversation.data.messages);
       setReceiverName(
-        conversation.data.users.find((member) => member?._id !== user?._id).name
+        conversation.data.users
+          .find((member) => member?._id !== user?._id)
+          .name.split(" ")[0]
       );
       setReceiverImage(
         conversation.data.users.find((member) => member?._id !== user?._id)
@@ -153,166 +159,185 @@ const ChatWindow = () => {
 
   return (
     <div className="w-3/4 h-full bg-slate-300 ">
-      {id !== undefined && (
-        <>
-          {/* navbar with profile icon */}
-          <div className="flex flex-row items-center justify-between p-2 bg-slate-300 border-3 border border-b-white">
-            <div className="flex flex-row items-center justify-center">
-              <div className="flex flex-row items-center justify-center w-12 h-12 bg-white rounded-full">
-                <img
-                  className="w-9 h-9 rounded-full object-cover"
-                  src={receiverImage}
-                  alt="dp"
-                />
+      {
+        id !== undefined && (
+          <>
+            {/* navbar with profile icon */}
+            <div className="flex flex-row items-center justify-between p-2 bg-slate-300 border-3 border border-b-white">
+              <div className="flex flex-row items-center justify-center">
+                <div className="flex flex-row items-center justify-center w-12 h-12 bg-white rounded-full">
+                  {loading ? (
+                    <Skeleton
+                      variant="circular"
+                      width={40}
+                      height={40}
+                      animation="wave"
+                    />
+                  ) : (
+                    <img
+                      className="w-9 h-9 rounded-full object-cover"
+                      src={receiverImage}
+                      alt="dp"
+                    />
+                  )}
+                </div>
+                <h1 className="ml-2 text-xl font-bold text-white">
+                  {receiverName}
+                </h1>
               </div>
-              <h1 className="ml-2 text-xl font-bold text-white">
-                {receiverName}
-              </h1>
             </div>
-          </div>
-          {/* chat window */}
-          <div className="flex flex-col  h-[91.3%] justify-between w-full bg-slate-300  ">
-            {/* messages */}
-            <div
-              className="flex flex-col w-full h- overflow-auto chat-window mb-4 "
-              // disable scroll when popup is open
-              style={{ overflowY: showPopup ? "hidden" : "auto" }}
-            >
-              {messages &&
-                messages.map((message) => (
-                  <div
-                    key={message._id}
-                    className="flex flex-col my-2 max-w-[40%] min-w-[30%] "
-                    style={{
-                      marginLeft:
-                        message?.user?._id !== user?._id ? "0px" : "auto",
-                      marginRight:
-                        message?.user?._id !== user?._id ? "auto" : "0px",
-                    }}
-                  >
+            {/* chat window */}
+            <div className="flex flex-col  h-[91.3%] justify-between w-full bg-slate-300  ">
+              {/* messages */}
+              <div
+                className="flex flex-col w-full h- overflow-auto chat-window mb-4 "
+                // disable scroll when popup is open
+                style={{ overflowY: showPopup ? "hidden" : "auto" }}
+              >
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <CircularProgress />
+                  </div>
+                ) : (
+                  messages &&
+                  messages.map((message) => (
                     <div
-                      className="flex  w-full "
+                      key={message._id}
+                      className="flex flex-col my-2 max-w-[40%] min-w-[30%] "
                       style={{
-                        flexDirection:
-                          message?.user?._id !== user?._id
-                            ? "row"
-                            : "row-reverse",
+                        marginLeft:
+                          message?.user?._id !== user?._id ? "0px" : "auto",
+                        marginRight:
+                          message?.user?._id !== user?._id ? "auto" : "0px",
                       }}
-                      // on right click
-                      onContextMenu={handleContextMenu}
-                      data-id={message._id}
                     >
-                      <TextActionPopup
-                        setShowPopup={setShowPopup}
-                        // filter message
-                        message={
-                          messages.filter(
-                            (msg) => msg._id.toString() === deletedMessageId
-                          )[0]
-                        }
-                        showPopup={showPopup}
-                        position={position}
-                        onClick={() => {
-                          deleteMessageHandler(message._id);
-                        }}
-                        user={user}
-                      />
-                      {/* index > 0 &&
-                      messages[index - 1]?.user?._id === message?.user?._id ?  */}
                       <div
-                        className="flex flex-col items-start justify-center ml-2 w-2/3 p-3 mt-3"
+                        className="flex  w-full "
                         style={{
-                          backgroundColor:
+                          flexDirection:
                             message?.user?._id !== user?._id
-                              ? "#F3F4F6"
-                              : "#60A5FA",
-                          color:
-                            message?.user?._id !== user?._id
-                              ? "#60A5FA"
-                              : "#F3F4F6",
-                          borderRadius:
-                            message?.user?._id !== user?._id
-                              ? "0px 20px  20px  20px"
-                              : " 20px 0px 20px 20px ",
+                              ? "row"
+                              : "row-reverse",
                         }}
+                        // on right click
+                        onContextMenu={handleContextMenu}
                         data-id={message._id}
                       >
-                        <p
-                          className="text-sm font-normal "
+                        <TextActionPopup
+                          setShowPopup={setShowPopup}
+                          // filter message
+                          message={
+                            messages.filter(
+                              (msg) => msg._id.toString() === deletedMessageId
+                            )[0]
+                          }
+                          showPopup={showPopup}
+                          position={position}
+                          onClick={() => {
+                            deleteMessageHandler(message._id);
+                          }}
+                          user={user}
+                        />
+                        {/* index > 0 &&
+                      messages[index - 1]?.user?._id === message?.user?._id ?  */}
+                        <div
+                          className="flex flex-col items-start justify-center ml-2 w-2/3 p-3 mt-3"
+                          style={{
+                            backgroundColor:
+                              message?.user?._id !== user?._id
+                                ? "#F3F4F6"
+                                : "#60A5FA",
+                            color:
+                              message?.user?._id !== user?._id
+                                ? "#60A5FA"
+                                : "#F3F4F6",
+                            borderRadius:
+                              message?.user?._id !== user?._id
+                                ? "0px 20px  20px  20px"
+                                : " 20px 0px 20px 20px ",
+                          }}
                           data-id={message._id}
                         >
-                          {message.message}
-                        </p>
-                        <p
-                          className="text-xs font-normal ml-auto"
-                          data-id={message._id}
-                        >
-                          {formatTime(message.createdAt)}
-                        </p>
+                          <p
+                            className="text-sm font-normal "
+                            data-id={message._id}
+                          >
+                            {message.message}
+                          </p>
+                          <p
+                            className="text-xs font-normal ml-auto"
+                            data-id={message._id}
+                          >
+                            {formatTime(message.createdAt)}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                  ))
+                )}
+              </div>
+
+              {/* message input */}
+              <div className="flex flex-row items-center justify-between w-full h-[10%] bg-white p-3">
+                <input
+                  type="text"
+                  name="message"
+                  id="message"
+                  placeholder="Type a message"
+                  className="w-[95%] px-5 py-2 text-base text-gray-700 border-0 rounded-full bg-transparent focus:outline-none"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  // enter to send message
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage(e);
+                    }
+                  }}
+                />
+                <div className="flex">
+                  <div className="relative">
+                    <button
+                      className="flex flex-row items-center justify-center"
+                      onClick={() => setShowPicker(!showPicker)}
+                    >
+                      <TagFacesIcon
+                        sx={{ fontSize: 30 }}
+                        className={`mx-2  ${
+                          showPicker ? "text-blue-500" : "text-gray-700"
+                        }`}
+                      />
+                    </button>
+                    <div className="absolute bottom-7 right-0">
+                      {showPicker && (
+                        <EmojiPicker
+                          onEmojiClick={(emojiObject, e) => {
+                            setMessage(message + emojiObject.emoji);
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
-                ))}
-            </div>
-           
-            {/* message input */}
-            <div className="flex flex-row items-center justify-between w-full h-[10%] bg-white p-3">
-              <input
-                type="text"
-                name="message"
-                id="message"
-                placeholder="Type a message"
-                className="w-[95%] px-5 py-2 text-base text-gray-700 border-0 rounded-full bg-transparent focus:outline-none"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                // enter to send message
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage(e);
-                  }
-                }}
-              />
-              <div className="flex">
-                <div className="relative">
+
                   <button
                     className="flex flex-row items-center justify-center"
-                    onClick={() => setShowPicker(!showPicker)}
+                    onClick={sendMessage}
                   >
-                    <TagFacesIcon
-                      sx={{ fontSize: 30 }}
+                    <SendIcon
                       className={`mx-2  ${
-                        showPicker ? "text-blue-500" : "text-gray-700"
+                        message.trim().length > 0
+                          ? "text-blue-500"
+                          : "text-gray-700"
                       }`}
                     />
                   </button>
-                  <div className="absolute bottom-7 right-0">
-                    {showPicker && (
-                      <EmojiPicker
-                        onEmojiClick={(emojiObject, e) => {
-                          setMessage(message + emojiObject.emoji);
-                        }}
-                      />
-                    )}
-                  </div>
                 </div>
-
-                <button
-                  className="flex flex-row items-center justify-center"
-                  onClick={sendMessage}
-                >
-                  <SendIcon
-                    className={`mx-2  ${
-                      message.trim().length > 0
-                        ? "text-blue-500"
-                        : "text-gray-700"
-                    }`}
-                  />
-                </button>
               </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )
+
+        // ))
+      }
     </div>
   );
 };

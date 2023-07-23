@@ -101,6 +101,7 @@ const userSlice = createSlice({
             state.loading = false;
             state.error = null;
             state.success = false;
+            localStorage.removeItem("userInfo");
         }
     },
     extraReducers(builder) {
